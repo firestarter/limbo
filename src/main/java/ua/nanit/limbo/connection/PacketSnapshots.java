@@ -130,9 +130,9 @@ public final class PacketSnapshots {
         }
 
         if (server.getConfig().isUseJoinMessage()) {
-            PacketChatMessage joinMessage = new PacketChatMessage();
+            PacketSystemMessage joinMessage = new PacketSystemMessage();
             joinMessage.setJsonData(server.getConfig().getJoinMessage());
-            joinMessage.setPosition(PacketChatMessage.PositionLegacy.SYSTEM_MESSAGE);
+            joinMessage.setPosition(PacketSystemMessage.PositionLegacy.SYSTEM_MESSAGE);
             joinMessage.setSender(UUID.randomUUID());
             PACKET_JOIN_MESSAGE = PacketSnapshot.of(joinMessage);
         }

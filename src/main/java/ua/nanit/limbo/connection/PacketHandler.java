@@ -17,12 +17,15 @@
 
 package ua.nanit.limbo.connection;
 
+import com.grack.nanojson.JsonWriter;
 import io.netty.buffer.Unpooled;
 import ua.nanit.limbo.LimboConstants;
 import ua.nanit.limbo.protocol.packets.PacketHandshake;
 import ua.nanit.limbo.protocol.packets.login.PacketLoginPluginRequest;
 import ua.nanit.limbo.protocol.packets.login.PacketLoginPluginResponse;
 import ua.nanit.limbo.protocol.packets.login.PacketLoginStart;
+import ua.nanit.limbo.protocol.packets.play.PacketChatMessage;
+import ua.nanit.limbo.protocol.packets.play.PacketSystemMessage;
 import ua.nanit.limbo.protocol.packets.status.PacketStatusPing;
 import ua.nanit.limbo.protocol.packets.status.PacketStatusRequest;
 import ua.nanit.limbo.protocol.packets.status.PacketStatusResponse;
@@ -61,6 +64,23 @@ public class PacketHandler {
                 conn.disconnectLogin("Invalid BungeeGuard token or handshake format");
             }
         }
+    }
+
+    public void handle(ClientConnection conn, PacketChatMessage packet) {
+        String json = JsonWriter.string()
+                .object()
+                .value("text", "<" + conn.getUsername() + "> " + packet.getMessage())
+                .value("color", "#9ca3af")
+                .end()
+                .done();
+
+        PacketSystemMessage broadcastPacket = new PacketSystemMessage();
+        broadcastPacket.setJsonData(json);
+        broadcastPacket.setPosition(PacketSystemMessage.PositionLegacy.SYSTEM_MESSAGE);
+        broadcastPacket.setSender(conn.getUuid());
+
+        server.getConnections().getAllConnections().forEach(connection -> connection.sendPacket(broadcastPacket));
+        Logger.info("[chat] %s: %s", conn.getUsername(), packet.getMessage());
     }
 
     public void handle(ClientConnection conn, PacketStatusRequest packet) {

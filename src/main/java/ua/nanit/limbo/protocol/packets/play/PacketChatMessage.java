@@ -17,57 +17,35 @@
 
 package ua.nanit.limbo.protocol.packets.play;
 
+import org.jetbrains.annotations.NotNull;
+import ua.nanit.limbo.connection.ClientConnection;
 import ua.nanit.limbo.protocol.ByteMessage;
-import ua.nanit.limbo.protocol.PacketOut;
+import ua.nanit.limbo.protocol.PacketIn;
 import ua.nanit.limbo.protocol.registry.Version;
+import ua.nanit.limbo.server.LimboServer;
 
-import java.util.UUID;
+public class PacketChatMessage implements PacketIn {
 
-public class PacketChatMessage implements PacketOut {
+    private String message;
 
-    private String jsonData;
-    private PositionLegacy position;
-    private UUID sender;
-
-    public void setJsonData(String jsonData) {
-        this.jsonData = jsonData;
-    }
-
-    public void setPosition(PositionLegacy position) {
-        this.position = position;
-    }
-
-    public void setSender(UUID sender) {
-        this.sender = sender;
+    @NotNull
+    public String getMessage() {
+        return message;
     }
 
     @Override
-    public void encode(ByteMessage msg, Version version) {
-        msg.writeString(jsonData);
-        if (version.moreOrEqual(Version.V1_19_1)) {
-            msg.writeBoolean(position.index == PositionLegacy.ACTION_BAR.index);
-        } else if (version.moreOrEqual(Version.V1_19)) {
-            msg.writeVarInt(position.index);
-        } else if (version.moreOrEqual(Version.V1_8)) {
-            msg.writeByte(position.index);
+    public void decode(ByteMessage msg, Version version) {
+        String message = msg.readString();
+
+        if (message.length() > 256) {
+            message = message.substring(0, 256);
         }
 
-        if (version.moreOrEqual(Version.V1_16) && version.less(Version.V1_19))
-            msg.writeUuid(sender);
+        this.message = message;
     }
 
-    public enum PositionLegacy {
-
-        CHAT(0),
-        SYSTEM_MESSAGE(1),
-        ACTION_BAR(2);
-
-        private final int index;
-
-        PositionLegacy(int index) {
-            this.index = index;
-        }
-
+    @Override
+    public void handle(ClientConnection conn, LimboServer server) {
+        server.getPacketHandler().handle(conn, this);
     }
-
 }

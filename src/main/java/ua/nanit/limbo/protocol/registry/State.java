@@ -89,6 +89,9 @@ public enum State {
                     map(0x12, V1_19_1, V1_19_1),
                     map(0x11, V1_19_3, V1_19_3)
             );
+            serverBound.register(PacketChatMessage::new,
+                    map(0x05, V1_19, V1_19_3)
+            );
 
             clientBound.register(PacketDeclareCommands::new,
                     map(0x11, V1_13, V1_14_4),
@@ -163,7 +166,7 @@ public enum State {
                     map(0x20, V1_19_1, V1_19_1),
                     map(0x1F, V1_19_3, V1_19_3)
             );
-            clientBound.register(PacketChatMessage::new,
+            clientBound.register(PacketSystemMessage::new,
                     map(0x02, V1_7_2, V1_8),
                     map(0x0F, V1_9, V1_12_2),
                     map(0x0E, V1_13, V1_14_4),
